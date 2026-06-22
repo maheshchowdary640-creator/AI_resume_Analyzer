@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Analyzer & Job Matcher</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Application Script -->
+    <script src="app.js" defer></script>
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <div class="logo-text">
+                    <span class="logo-title">ResuMatch</span>
+                    <span class="logo-subtitle">AI Analyzer</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <button class="nav-btn active" data-tab="analyzer">
+                    <i class="fa-solid fa-file-invoice"></i>
+                    <span>Resume Analyzer</span>
+                </button>
+                <button class="nav-btn" data-tab="matcher">
+                    <i class="fa-solid fa-bullseye"></i>
+                    <span>Job Matcher</span>
+                </button>
+                <button class="nav-btn" data-tab="assistant">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>AI Assistant</span>
+                </button>
+                <button class="nav-btn" data-tab="settings">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Settings</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="status-indicator live" id="api-status-badge">
+                    <span class="status-dot"></span>
+                    <span class="status-label">Mock Mode Active</span>
+                </div>
+                <button id="theme-toggle" class="theme-btn">
+                    <i class="fa-solid fa-sun"></i>
+                    <span>Light Mode</span>
+                </button>
+            </div>
+        </aside>
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- HEADER -->
+            <header class="main-header">
+                <div class="header-title">
+                    <h1 id="page-title">Resume Analyzer</h1>
+                    <p id="page-subtitle" class="text-muted">Upload and analyze your resume for insights</p>
+                </div>
+                <div class="user-profile">
+                    <span class="avatar-letter" id="user-avatar">?</span>
+                    <div class="profile-info">
+                        <span class="profile-name" id="user-name-header">Guest User</span>
+                        <span class="profile-role" id="user-status-header">No Resume Loaded</span>
+                    </div>
+                </div>
+            </header>
+            <!-- TABS CONTAINER -->
+            <div class="tab-content-container">
+                
+                <!-- TAB 1: ANALYZER -->
+                <section class="tab-pane active" id="tab-analyzer">
+                    <div class="analyzer-layout">
+                        <!-- Left Panel: Uploader -->
+                        <div class="card upload-card">
+                            <div class="card-header">
+                                <h3>Upload Resume</h3>
+                                <span class="badge">PDF, DOCX, TXT</span>
+                            </div>
+                            <div class="drag-drop-zone" id="drop-zone">
+                                <input type="file" id="file-input" accept=".pdf,.docx,.txt,.json" hidden>
+                                <div class="upload-icon">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                </div>
+                                <h4>Drag & Drop your resume here</h4>
+                                <p class="text-muted">or click to browse files</p>
+                                <span class="file-limits">Maximum size: 10MB</span>
+                            </div>
+                            
+                            <!-- Uploading State -->
+                            <div class="uploading-progress" id="uploading-progress" style="display: none;">
+                                <div class="spinner"></div>
+                                <p>Extracting raw text and analyzing using Gemini...</p>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill" id="upload-progress-fill" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                            <!-- File Details (When uploaded) -->
+                            <div class="file-details-card" id="file-details" style="display: none;">
+                                <div class="file-info-row">
+                                    <i class="fa-solid fa-file-pdf file-type-icon" id="file-icon"></i>
+                                    <div class="file-text-details">
+                                        <span class="filename" id="filename-label">resume.pdf</span>
+                                        <span class="filesize text-muted" id="filesize-label">1.2 MB</span>
+                                    </div>
+                                    <button class="btn btn-icon-only remove-file-btn" id="remove-file-btn">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </div>
+                                <button class="btn btn-primary btn-block" id="parse-btn">
+                                    <i class="fa-solid fa-bolt"></i> Run Deep Analysis
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Right Panel: Parsed Results -->
+                        <div class="card results-card" id="analysis-results-placeholder">
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <i class="fa-solid fa-file-circle-question"></i>
+                                </div>
+                                <h3>No Resume Loaded</h3>
+                                <p class="text-muted">Please upload your resume to see parsed intelligence, career summaries, and structured sections.</p>
+                            </div>
+                        </div>
+                        <!-- Real Analysis Results Dashboard (Hidden initially) -->
+                        <div class="analysis-results-dashboard" id="analysis-dashboard" style="display: none;">
+                            <!-- Top Profile Header -->
+                            <div class="card profile-overview-card">
+                                <div class="profile-card-layout">
+                                    <div class="candidate-avatar">
+                                        <i class="fa-solid fa-user-tie"></i>
+                                    </div>
+                                    <div class="candidate-meta">
+                                        <h2 id="cand-name">Jane Doe</h2>
+                                        <div class="contact-links" id="cand-contacts">
+                                            <!-- Dynamic links go here -->
+                                        </div>
+                                    </div>
+                                    <div class="resume-strength-meter">
+                                        <div class="circular-progress-wrap">
+                                            <svg viewBox="0 0 36 36" class="circular-chart">
+                                                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                                <path class="circle" id="strength-circle" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                                <text x="18" y="20.35" class="percentage" id="strength-score">0%</text>
+                                            </svg>
+                                        </div>
+                                        <span class="strength-label">Resume Strength</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Summary & Skills -->
+                            <div class="grid-2-col">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3>Professional Summary</h3>
+                                        <i class="fa-solid fa-quote-left card-header-icon"></i>
+                                    </div>
+                                    <p class="summary-text" id="cand-summary">No summary provided.</p>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3>Skills Inventory</h3>
+                                        <i class="fa-solid fa-list-check card-header-icon"></i>
+                                    </div>
+                                    <div class="skills-section">
+                                        <div class="skill-category">
+                                            <span class="category-title">Technical</span>
+                                            <div class="tag-cloud" id="tags-technical"></div>
+                                        </div>
+                                        <div class="skill-category">
+                                            <span class="category-title">Tools & Databases</span>
+                                            <div class="tag-cloud" id="tags-tools"></div>
+                                        </div>
+                                        <div class="skill-category">
+                                            <span class="category-title">Soft Skills</span>
+                                            <div class="tag-cloud" id="tags-soft"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Timeline Work Experience -->
+                            <div class="card experience-card">
+                                <div class="card-header">
+                                    <h3>Professional Timeline</h3>
+                                    <i class="fa-solid fa-briefcase card-header-icon"></i>
+                                </div>
+                                <div class="timeline" id="experience-timeline">
+                                    <!-- Dynamic items -->
+                                </div>
+                            </div>
+                            <!-- Projects & Education -->
+                            <div class="grid-2-col">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3>Projects Showcase</h3>
+                                        <i class="fa-solid fa-diagram-project card-header-icon"></i>
+                                    </div>
+                                    <div class="projects-list" id="projects-container">
+                                        <!-- Dynamic projects -->
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3>Education & Certifications</h3>
+                                        <i class="fa-solid fa-graduation-cap card-header-icon"></i>
+                                    </div>
+                                    <div class="education-section">
+                                        <h4>Education</h4>
+                                        <div class="education-list" id="education-container"></div>
+                                        <h4 class="spacing-top">Certifications</h4>
+                                        <div class="certs-list" id="certs-container"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- TAB 2: MATCHER -->
+                <section class="tab-pane" id="tab-matcher">
+                    <div class="matcher-layout">
+                        <!-- Input Side -->
+                        <div class="card job-desc-card">
+                            <div class="card-header">
+                                <h3>Target Job Description</h3>
+                                <button class="btn btn-sm btn-secondary" id="clear-jd-btn">
+                                    <i class="fa-solid fa-rotate-left"></i> Clear
+                                </button>
+                            </div>
+                            <div class="jd-input-container">
+                                <textarea id="jd-textarea" placeholder="Paste the job description or role requirements here to compare against your uploaded resume..."></textarea>
+                            </div>
+                            <button class="btn btn-accent btn-block" id="match-btn">
+                                <i class="fa-solid fa-crosshairs"></i> Calculate Compatibility
+                            </button>
+                        </div>
+                        <!-- Output Side -->
+                        <div class="card match-results-card" id="match-results-placeholder">
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <i class="fa-solid fa-chart-pie"></i>
+                                </div>
+                                <h3>Awaiting Analysis</h3>
+                                <p class="text-muted">Paste a job description and click "Calculate Compatibility" to see your alignment score, keyword matches, and improvement tips.</p>
+                            </div>
+                        </div>
+                        <!-- Real Match Dashboard (Hidden initially) -->
+                        <div class="match-results-dashboard" id="match-dashboard" style="display: none;">
+                            <div class="grid-2-col">
+                                <!-- Score Gauge -->
+                                <div class="card center-content text-center">
+                                    <div class="card-header">
+                                        <h3>Compatibility Index</h3>
+                                    </div>
+                                    <div class="circular-progress-wrap large">
+                                        <svg viewBox="0 0 36 36" class="circular-chart accent">
+                                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                            <path class="circle" id="match-circle" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                            <text x="18" y="20.35" class="percentage" id="match-score-text">0%</text>
+                                        </svg>
+                                    </div>
+                                    <h4 id="match-verdict" class="spacing-top">Reviewing Match...</h4>
+                                </div>
+                                <!-- Skills Alignment -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3>Skills Coverage</h3>
+                                    </div>
+                                    <div class="skills-alignment-row">
+                                        <div class="alignment-column">
+                                            <h4 class="text-success"><i class="fa-solid fa-circle-check"></i> Matching Skills</h4>
+                                            <ul class="check-list" id="match-matching-skills">
+                                                <!-- Dynamic list -->
+                                            </ul>
+                                        </div>
+                                        <div class="alignment-column">
+                                            <h4 class="text-danger"><i class="fa-solid fa-triangle-exclamation"></i> Missing Keywords</h4>
+                                            <ul class="check-list" id="match-missing-skills">
+                                                <!-- Dynamic list -->
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Keyword Density Analysis -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Keyword Density & Importance</h3>
+                                    <i class="fa-solid fa-magnifying-glass-chart card-header-icon"></i>
+                                </div>
+                                <div class="keyword-grid" id="keyword-container">
+                                    <!-- Dynamic keywords progress bars -->
+                                </div>
+                            </div>
+                            <!-- Resume Feedback -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>ATS Optimization Feedback</h3>
+                                    <i class="fa-solid fa-clipboard-list card-header-icon"></i>
+                                </div>
+                                <ul class="feedback-list" id="match-feedback">
+                                    <!-- Dynamic feedback -->
+                                </ul>
+                            </div>
+                            <!-- Tailoring suggestions -->
+                            <div class="card tailoring-card">
+                                <div class="card-header">
+                                    <h3>Tailoring Suggestions (Gemini AI Powered)</h3>
+                                    <i class="fa-solid fa-signature card-header-icon"></i>
+                                </div>
+                                <div class="tailoring-content">
+                                    <div class="tailor-block">
+                                        <h5>Suggested Summary Rewrite:</h5>
+                                        <div class="tailor-box" id="tailor-summary-box"></div>
+                                    </div>
+                                    <div class="tailor-block spacing-top">
+                                        <h5>Suggested Experience Bullet Improvements:</h5>
+                                        <div class="tailor-list-box" id="tailor-exp-box"></div>
+                                    </div>
+                                    <div class="tailor-block spacing-top">
+                                        <h5>Target Project Framing:</h5>
+                                        <div class="tailor-list-box" id="tailor-proj-box"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- TAB 3: ASSISTANT -->
+                <section class="tab-pane" id="tab-assistant">
+                    <div class="assistant-layout">
+                        <!-- Sidebar contexts -->
+                        <div class="assistant-sidebar">
+                            <div class="card sidebar-card">
+                                <h4>Session Context</h4>
+                                <div class="context-item" id="context-resume">
+                                    <i class="fa-solid fa-circle-xmark text-danger"></i>
+                                    <span>Resume: <strong>Not Loaded</strong></span>
+                                </div>
+                                <div class="context-item" id="context-jd">
+                                    <i class="fa-solid fa-circle-xmark text-danger"></i>
+                                    <span>Job Desc: <strong>Not Linked</strong></span>
+                                </div>
+                            </div>
+                            <div class="card sidebar-card suggestion-card">
+                                <h4>Quick Prompts</h4>
+                                <button class="btn btn-sm btn-secondary quick-prompt-btn" data-prompt="Critique my resume summary and make it sound more executive.">
+                                    <i class="fa-solid fa-pen-nib"></i> Critique Summary
+                                </button>
+                                <button class="btn btn-sm btn-secondary quick-prompt-btn" data-prompt="What projects could I build to show proficiency in the missing skills?">
+                                    <i class="fa-solid fa-lightbulb"></i> Project Ideas
+                                </button>
+                                <button class="btn btn-sm btn-secondary quick-prompt-btn" data-prompt="Explain how I can rewrite my bullet points using the X-Y-Z formula.">
+                                    <i class="fa-solid fa-star"></i> X-Y-Z Rewrite Tips
+                                </button>
+                                <button class="btn btn-sm btn-secondary quick-prompt-btn" data-prompt="Simulate a brief behavioral interview based on my resume and the job description.">
+                                    <i class="fa-solid fa-comments-question"></i> Interview Prep
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Chat room -->
+                        <div class="card chat-card">
+                            <div class="chat-header">
+                                <div class="chat-bot-avatar">
+                                    <i class="fa-solid fa-robot"></i>
+                                </div>
+                                <div class="chat-header-info">
+                                    <h4>AI Career Coach</h4>
+                                    <span class="chat-status text-success"><i class="fa-solid fa-circle"></i> Online</span>
+                                </div>
+                                <button class="btn btn-sm btn-secondary btn-icon-only" id="clear-chat-btn" title="Clear Chat">
+                                    <i class="fa-solid fa-trash-arrow-up"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Chat Area -->
+                            <div class="chat-messages" id="chat-messages-container">
+                                <div class="chat-msg bot">
+                                    <div class="msg-avatar">
+                                        <i class="fa-solid fa-robot"></i>
+                                    </div>
+                                    <div class="msg-content">
+                                        <p>Hello! I am your AI career assistant. Upload your resume or job description, and I can help you write tailored bullet points, critique your resume sections, or practice interview questions. How can I help you today?</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Chat Input -->
+                            <div class="chat-input-area">
+                                <textarea id="chat-input" placeholder="Ask your AI Career Assistant a question..."></textarea>
+                                <button class="btn btn-accent" id="chat-send-btn">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- TAB 4: SETTINGS -->
+                <section class="tab-pane" id="tab-settings">
+                    <div class="settings-layout">
+                        <div class="card settings-card">
+                            <div class="card-header">
+                                <h3>System Settings</h3>
+                                <i class="fa-solid fa-gears card-header-icon"></i>
+                            </div>
+                            
+                            <div class="settings-group">
+                                <h4>Gemini API Key</h4>
+                                <p class="text-muted">Input your Gemini API key below. The key is saved securely in your browser's local storage and never sent anywhere else other than the API proxy.</p>
+                                <div class="input-with-button">
+                                    <div class="input-wrap">
+                                        <i class="fa-solid fa-key input-icon"></i>
+                                        <input type="password" id="api-key-input" placeholder="Paste your Gemini API Key here...">
+                                    </div>
+                                    <button class="btn btn-primary" id="save-key-btn">Save Key</button>
+                                </div>
+                                <div class="settings-actions">
+                                    <button class="btn btn-secondary" id="clear-key-btn">Clear Saved Key</button>
+                                </div>
+                            </div>
+                            <div class="settings-group spacing-top">
+                                <h4>Operation Mode</h4>
+                                <div class="toggle-control">
+                                    <div class="toggle-text">
+                                        <strong>Force Mock Mode</strong>
+                                        <p class="text-muted">When enabled, the application will use simulated AI analysis rather than calling the Gemini API endpoint. Useful for testing UI design without consuming credits.</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" id="mock-mode-toggle" checked>
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="settings-group spacing-top">
+                                <h4>Usage & Privacy</h4>
+                                <div class="privacy-box">
+                                    <p><i class="fa-solid fa-shield-halved text-success"></i> <strong>Data Security:</strong> The parsing, matching, and assistant logic runs on your local machine. Your resume text, job descriptions, and chats are processed directly by your API key with Gemini. No third-party databases are used to store your resumes.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

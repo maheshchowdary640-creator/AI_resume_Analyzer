@@ -1,0 +1,41 @@
+ AI Resume Analyzer & Job Matcher with AI Assistant
+A sleek, responsive, and feature-rich full-stack web application designed to help job seekers parse their resumes, score their compatibility against target job descriptions, and chat with an interactive AI Career Coach.
+## Features
+1. **Resume Analyzer & Parser**:
+   - Supports uploading resumes in **PDF, DOCX, TXT** formats.
+   - Extracts structured details including Name, Contact Info, Summary, Skills (Technical, Soft, Tools), Education, Timeline Work Experience, Projects, and Certifications.
+   - Calculates a **Resume Strength Score** to highlight missing contact info, brief summaries, or thin experience descriptions.
+2. **Job Description Matcher**:
+   - Compares the parsed resume directly against any job description text.
+   - Displays a dynamic **Compatibility Score gauge** (0-100%).
+   - Lists **Matching Skills** and highlights **Missing Keywords** side-by-side.
+   - Computes relevance weights and presence status for critical terms.
+   - Provides ATS layout recommendations.
+   - Generates tailored summary rewrites, X-Y-Z formula work bullet improvements, and target project reframing ideas.
+3. **AI Career Coach Chat**:
+   - Live conversational panel linked directly to the context of the uploaded resume and job description.
+   - Quick prompt shortcuts for critique assistance, mock interview preparation, project ideas, and X-Y-Z formula tips.
+   - Rich text message rendering with markdown support (bolding, lists, code snippets).
+4. **Flexible API Modes**:
+   - **Gemini API Mode**: Connects directly to Google Gemini 1.5 Flash using your API Key for fully live analyses. Set the key in Settings or load it from the `GEMINI_API_KEY` environment variable.
+   - **Mock Mode**: Zero-config mode enabled automatically out-of-the-box. Simulated AI logic will analyze resume details, align mock charts, and chat realistically so you can test all features without requiring credentials.
+## Getting Started
+### Prerequisites
+- Python 3.8 or higher installed on your system.
+### Running the Application
+1. **Start the Setup & Server**:
+   Execute the launcher script in your terminal:
+   ```bash
+   python run.py
+   ```
+   This will:
+   - Create a virtual environment `.venv` if not already present.
+   - Install all required libraries (`fastapi`, `uvicorn`, `pypdf`, `python-docx`, `google-generativeai`, `python-multipart`).
+   - Run the FastAPI application on http://127.0.0.1:8000.
+2. **Open the Dashboard**:
+   Open your browser and navigate to:
+   [http://127.0.0.1:8000](http://127.0.0.1:8000)
+3. **Configuration (Optional)**:
+   - Navigate to the **Settings** tab.
+   - Paste your **Gemini API Key** and click **Save Key** to enable live AI analysis.
+   - Toggle **Force Mock Mode** if you want to swap back to offline simulations.

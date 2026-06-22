@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.system_generated/
+.gemini/
+.agents/
+.idea/
+.vscode/
+*.log

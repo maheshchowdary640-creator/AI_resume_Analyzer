@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 import uvicorn
-
+app=FastAPI()
 app.mount("/static", StaticFiles(directory="."), name="static")
 
 @app.get("/")

@@ -10,6 +10,12 @@ from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 import uvicorn
 
+app.mount("/static", StaticFiles(directory="."), name="static")
+
+@app.get("/")
+def home():
+    return FileResponse("index.html")
+
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("AIResumeAnalyzer")
